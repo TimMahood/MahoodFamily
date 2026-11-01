@@ -26,9 +26,12 @@ android {
             val ks = System.getenv("KEYSTORE_FILE")
             if (ks != null && file(ks).exists()) {
                 storeFile = file(ks)
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("KEY_ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
+                // The family key was created with the same password for store and key,
+                // so the store password is used for both (trimmed against pasted newlines).
+                val password = System.getenv("KEYSTORE_PASSWORD")?.trim()
+                storePassword = password
+                keyAlias = System.getenv("KEY_ALIAS")?.trim()?.ifEmpty { null } ?: "mahoodfamily"
+                keyPassword = password
             }
         }
     }
