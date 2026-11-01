@@ -34,7 +34,6 @@ fun MainScreen(onLeft: () -> Unit) {
     val enabled = remember(modulesVersion) { Family.enabledModules() }
     val backStack by nav.currentBackStackEntryAsState()
     val route = backStack?.destination?.route
-    val currentId = backStack?.arguments?.getString("id")
 
     fun go(target: String) = nav.navigate(target) {
         popUpTo(nav.graph.findStartDestination().id) { saveState = true }
@@ -51,7 +50,7 @@ fun MainScreen(onLeft: () -> Unit) {
                 )
                 enabled.forEach { m ->
                     NavigationBarItem(
-                        selected = route == "m/{id}" && currentId == m.id, onClick = { go("m/${m.id}") },
+                        selected = route == "m/${m.id}", onClick = { go("m/${m.id}") },
                         icon = { Icon(m.icon, null) }, label = { Text(m.title) },
                     )
                 }
@@ -65,9 +64,11 @@ fun MainScreen(onLeft: () -> Unit) {
         Box(Modifier.fillMaxSize().padding(padding)) {
             NavHost(nav, startDestination = "home") {
                 composable("home") { HomeScreen(enabled, open = { go("m/$it") }) }
-                composable("m/{id}") { entry ->
-                    val module = Family.modules.firstOrNull { it.id == entry.arguments?.getString("id") }
-                    Column(Modifier.fillMaxSize()) { module?.Screen(Family.context) }
+                // One route per module so each tab keeps its own saved state.
+                Family.modules.forEach { module ->
+                    composable("m/${module.id}") {
+                        Column(Modifier.fillMaxSize()) { module.Screen(Family.context) }
+                    }
                 }
                 composable("family") {
                     FamilyScreen(onModulesChanged = { modulesVersion++ }, onLeft = onLeft)
