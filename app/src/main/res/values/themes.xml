@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.MahoodFamily" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+    <color name="background">#F6FAF6</color>
+    <color name="icon_bg">#2F6A4F</color>
+</resources>
