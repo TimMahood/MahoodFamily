@@ -66,7 +66,7 @@ import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
 /**
- * Shared reminders (bins, school dinner money, council tax...) with a phone
+ * Shared reminders (bins, school dinner money, school trips...) with a phone
  * notification at the set time. "Done" on either phone ticks it off for both.
  * Collection "reminders" {title, note, who (email, empty = both), repeat, start (yyyy-MM-dd),
  * time (minutes after midnight), doneThrough (last occurrence ticked off), by}.
@@ -74,7 +74,7 @@ import java.util.Locale
 class RemindersModule : FamilyModule {
     override val id = "reminders"
     override val title = "Reminders"
-    override val description = "Bins, dinner money, bills: a nudge on both phones"
+    override val description = "Bins, dinner money and more: a nudge on both phones"
     override val icon: ImageVector = Icons.Filled.Alarm
 
     private val R = ReminderAlarms.COLLECTION
@@ -85,10 +85,8 @@ class RemindersModule : FamilyModule {
         Preset("Bins out", "weekly", DayOfWeek.MONDAY, 19 * 60),
         Preset("Recycling out", "fortnightly", DayOfWeek.MONDAY, 19 * 60),
         Preset("Top up school dinner money", "weekly", DayOfWeek.SUNDAY, 19 * 60),
-        Preset("Pay nursery", "monthly", null, 9 * 60),
         Preset("Swimming lesson", "weekly", DayOfWeek.SATURDAY, 8 * 60),
         Preset("Order prescription", "monthly", null, 9 * 60),
-        Preset("Council tax", "monthly", null, 9 * 60),
         Preset("Car MOT", "yearly", null, 9 * 60),
         Preset("Water the plants", "weekly", DayOfWeek.WEDNESDAY, 18 * 60),
         Preset("Birthday card to post", "yearly", null, 9 * 60),
@@ -169,7 +167,7 @@ class RemindersModule : FamilyModule {
         val soon = all.filter { c -> current(c)?.let { !it.isAfter(today.plusDays(2)) } == true }
         HomeCardFrame(icon, "Reminders", "All ›", open) {
             when {
-                all.isEmpty() -> Text("Bins, dinner money, bills: set a reminder and both phones get a nudge.",
+                all.isEmpty() -> Text("Bins, dinner money and the like: set a reminder and both phones get a nudge.",
                     fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 soon.isEmpty() -> Text("Nothing in the next couple of days. Next: ${all.first().string("title")}, " +
                     (current(all.first())?.let { dayLabel(it) } ?: ""), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
