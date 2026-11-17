@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.time.Period
 
 /**
- * Children in the family. They don't have phones, but modules (baby log, chores,
+ * Children in the family. They don't have phones, but modules (chores,
  * school bags, milestones, health) record things about them.
  * Collection "kids" {name, born (yyyy-MM-dd), color}.
  */

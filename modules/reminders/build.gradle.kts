@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.mahood.family.baby"
+    namespace = "com.mahood.family.reminders"
     compileSdk = 35
     defaultConfig {
         minSdk = 26
@@ -27,4 +27,5 @@ dependencies {
     implementation(libs.compose.icons.extended)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.coroutines.android)
+    testImplementation(libs.junit)
 }

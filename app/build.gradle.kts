@@ -65,7 +65,7 @@ dependencies {
     implementation(project(":modules:board"))
     implementation(project(":modules:checkin"))
     implementation(project(":modules:meals"))
-    implementation(project(":modules:baby"))
+    implementation(project(":modules:reminders"))
     implementation(project(":modules:school"))
     implementation(project(":modules:chores"))
     implementation(project(":modules:milestones"))

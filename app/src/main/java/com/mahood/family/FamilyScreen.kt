@@ -2,7 +2,11 @@ package com.mahood.family
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -80,6 +84,13 @@ fun FamilyScreen(onModulesChanged: () -> Unit, onLeft: () -> Unit, open: (String
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 18.dp)) {
         ScreenTitle("Family & features", "${Family.familyName ?: "Family"} · ${members.size} members")
 
+        Image(
+            painterResource(R.drawable.family_photo),
+            contentDescription = "The family",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxWidth().height(190.dp).padding(bottom = 12.dp).clip(RoundedCornerShape(24.dp)),
+        )
+
         update?.let { u ->
             Card(
                 Modifier.fillMaxWidth().padding(bottom = 12.dp), shape = RoundedCornerShape(20.dp),
@@ -119,7 +130,7 @@ fun FamilyScreen(onModulesChanged: () -> Unit, onLeft: () -> Unit, open: (String
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)) {
             Column(Modifier.padding(16.dp)) {
                 if (kids.isEmpty()) {
-                    Text("Add the children so the baby log, school bags, chores, milestones and health know about them. They don't need phones.",
+                    Text("Add the children so school bags, chores, milestones and health know about them. They don't need phones.",
                         fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 kids.forEach { kid ->

@@ -4,7 +4,7 @@ import com.mahood.family.core.ModuleContext
 import com.mahood.family.core.data.Record
 
 /**
- * The shared shopping list's storage, so other modules (meal planner, baby log...)
+ * The shared shopping list's storage, so other modules (the meal planner...)
  * can add items without depending on the Lists module.
  *
  * Collections: "lists" {name, order}, "items" {list, name, qty, note, aisle, aisleManual, done, by, created},

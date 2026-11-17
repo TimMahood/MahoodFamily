@@ -72,7 +72,7 @@ import com.mahood.family.core.ui.relativeTime
 
 /**
  * Shared lists: the weekly shop plus any other list (DIY, Christmas...).
- * Storage lives in core's [Shopping] so other modules (meal planner, baby log) can add items.
+ * Storage lives in core's [Shopping] so other modules (e.g. the meal planner) can add items.
  */
 class ListsModule : FamilyModule {
     override val id = "lists"

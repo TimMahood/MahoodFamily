@@ -43,7 +43,7 @@ fun KidDialog(ctx: ModuleContext, kid: Kid?, onDone: () -> Unit) {
                 }
                 born?.let { Text(Kid.ageText(it), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 Text(
-                    "Children don't need a phone. The baby log, chores, school bags, milestones and health use this list.",
+                    "Children don't need a phone. Chores, school bags, milestones and health use this list.",
                     fontSize = 12.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

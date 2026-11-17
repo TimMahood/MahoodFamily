@@ -42,6 +42,7 @@ object SyncEngine {
             val token = GoogleAuth.tokenSilently(context) ?: throw NeedsSignInException()
             val remote = withContext(Dispatchers.IO) { syncWith(DriveClient(token)) }
             _status.value = Status.Done(System.currentTimeMillis())
+            if (remote.isNotEmpty()) Family.enabledModules().forEach { runCatching { it.onDataChanged(Family.context) } }
             remote
         } catch (e: NeedsSignInException) {
             _status.value = Status.Failed("Sign in to Google again to sync", needsSignIn = true)
