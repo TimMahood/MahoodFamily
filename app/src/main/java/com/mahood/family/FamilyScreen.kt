@@ -2,6 +2,7 @@ package com.mahood.family
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.AlertDialog
@@ -45,10 +47,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mahood.family.core.Family
+import com.mahood.family.core.Kid
 import com.mahood.family.core.sync.DriveClient
 import com.mahood.family.core.sync.GoogleAuth
 import com.mahood.family.core.sync.SyncEngine
 import com.mahood.family.core.ui.Avatar
+import com.mahood.family.core.ui.KidDialog
 import com.mahood.family.core.ui.ScreenTitle
 import com.mahood.family.core.ui.SectionLabel
 import com.mahood.family.core.ui.relativeTime
@@ -57,10 +61,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun FamilyScreen(onModulesChanged: () -> Unit, onLeft: () -> Unit) {
+fun FamilyScreen(onModulesChanged: () -> Unit, onLeft: () -> Unit, open: (String) -> Unit) {
     val ctx = Family.context
     val context = LocalContext.current
     val members = ctx.members()
+    val kids = ctx.kids()
+    var editingKid by remember { mutableStateOf<Kid?>(null) }
+    var addingKid by remember { mutableStateOf(false) }
     val status by SyncEngine.status.collectAsState()
     val scope = rememberCoroutineScope()
     var showInvite by remember { mutableStateOf(false) }
@@ -107,20 +114,50 @@ fun FamilyScreen(onModulesChanged: () -> Unit, onLeft: () -> Unit) {
             }
         }
 
-        SectionLabel("MODULES", Modifier.padding(top = 8.dp))
+        SectionLabel("CHILDREN", Modifier.padding(top = 8.dp))
+        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)) {
+            Column(Modifier.padding(16.dp)) {
+                if (kids.isEmpty()) {
+                    Text("Add the children so the baby log, school bags, chores, milestones and health know about them. They don't need phones.",
+                        fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                kids.forEach { kid ->
+                    Row(Modifier.fillMaxWidth().clickable { editingKid = kid }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Avatar(kid.asMember(), 36.dp)
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(kid.name, fontWeight = FontWeight.SemiBold)
+                            if (kid.born != null) Text(kid.ageText(), fontSize = 12.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+                TextButton(onClick = { addingKid = true }) {
+                    Icon(Icons.Filled.Add, null, Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Add a child")
+                }
+            }
+        }
+
+        SectionLabel("FEATURES", Modifier.padding(top = 8.dp))
         Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)) {
             Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                 val enabledIds = remember(moduleVersion) { Family.enabledModules().map { it.id }.toSet() }
                 Family.modules.forEach { m ->
-                    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    val on = m.id in enabledIds
+                    Row(
+                        Modifier.fillMaxWidth().clickable(enabled = on) { open(m.id) }.padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Icon(m.icon, null, tint = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.width(14.dp))
                         Column(Modifier.weight(1f)) {
                             Text(m.title, fontWeight = FontWeight.SemiBold)
                             Text(m.description, fontSize = 12.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        Switch(m.id in enabledIds, {
+                        Switch(on, {
                             Family.setEnabled(m, it)
                             moduleVersion++
                             onModulesChanged()
@@ -166,6 +203,8 @@ fun FamilyScreen(onModulesChanged: () -> Unit, onLeft: () -> Unit) {
     }
 
     if (showInvite) InviteDialog(onDone = { showInvite = false })
+    if (addingKid) KidDialog(ctx, null) { addingKid = false }
+    editingKid?.let { kid -> KidDialog(ctx, kid) { editingKid = null } }
 
     if (confirmLeave) AlertDialog(
         onDismissRequest = { confirmLeave = false },
