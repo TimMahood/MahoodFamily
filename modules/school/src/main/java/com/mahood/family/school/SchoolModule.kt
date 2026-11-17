@@ -55,6 +55,7 @@ import com.mahood.family.core.ui.PersonChips
 import com.mahood.family.core.ui.PickDateDialog
 import com.mahood.family.core.ui.ScreenTitle
 import com.mahood.family.core.ui.SectionLabel
+import com.mahood.family.core.ui.clockTime
 import com.mahood.family.core.ui.dayLabel
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -135,6 +136,7 @@ class SchoolModule : FamilyModule {
     @Composable
     override fun Screen(ctx: ModuleContext) {
         val kids = ctx.kids()
+        val members = ctx.members()
         val items = ctx.records(ITEMS)
         val packed = ctx.records(PACKED).associateBy { it.id }
         var day by remember { mutableStateOf(focusDay()) }
@@ -172,16 +174,19 @@ class SchoolModule : FamilyModule {
                     val isPacked = isPacked(packed, item, day)
                     Row(
                         Modifier.fillMaxWidth().combinedClickable(
-                            onClick = { ctx.create(PACKED, "${item.id}_$day", mapOf("packed" to !isPacked, "by" to ctx.me?.email)) },
+                            onClick = { ctx.create(PACKED, "${item.id}_$day", mapOf("packed" to !isPacked, "by" to ctx.me?.email, "at" to System.currentTimeMillis())) },
                             onLongClick = { removing = item },
                         ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Checkbox(isPacked, { ctx.create(PACKED, "${item.id}_$day", mapOf("packed" to it, "by" to ctx.me?.email)) })
+                        Checkbox(isPacked, { ctx.create(PACKED, "${item.id}_$day", mapOf("packed" to it, "by" to ctx.me?.email, "at" to System.currentTimeMillis())) })
                         Column(Modifier.weight(1f)) {
                             Text(item.string("text") ?: "", fontSize = 15.sp,
                                 textDecoration = if (isPacked) TextDecoration.LineThrough else null)
-                            Text(repeatText(item), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            val log = packed["${item.id}_$day"]?.takeIf { isPacked }
+                            val packer = members.firstOrNull { it.email == log?.string("by") }?.name
+                            Text(repeatText(item) + (log?.let { l -> " · packed" + (packer?.let { " by $it" } ?: "") + (l.long("at")?.let { " at ${clockTime(it)}" } ?: "") } ?: ""),
+                                fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }

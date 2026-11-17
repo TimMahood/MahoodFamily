@@ -61,6 +61,7 @@ import com.mahood.family.core.ui.HomeCardFrame
 import com.mahood.family.core.ui.PersonChips
 import com.mahood.family.core.ui.ScreenTitle
 import com.mahood.family.core.ui.SectionLabel
+import com.mahood.family.core.ui.clockTime
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -234,7 +235,10 @@ class ChoresModule : FamilyModule {
                             "Weekly" + (c.long("day")?.let { d -> " from " + DayOfWeek.of(d.toInt()).getDisplayName(TextStyle.SHORT, Locale.getDefault()) } ?: "")
                         } else "Daily"
                         val starText = (c.long("stars") ?: 0L).takeIf { it > 0 && kids.any { k -> k.id == c.string("who") } }?.let { " · ⭐ $it" } ?: ""
-                        Text("${who?.name ?: "Anyone"} · $repeat$starText", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        val log = done[doneKey(c, today)]?.takeIf { isDone }
+                        val doer = people.firstOrNull { it.email == log?.string("by") }?.name
+                        val doneText = log?.let { l -> " · done" + (doer?.let { " by $it" } ?: "") + (l.long("at")?.let { " at ${clockTime(it)}" } ?: "") } ?: ""
+                        Text("${who?.name ?: "Anyone"} · $repeat$starText$doneText", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Avatar(who, 24.dp)
                 }

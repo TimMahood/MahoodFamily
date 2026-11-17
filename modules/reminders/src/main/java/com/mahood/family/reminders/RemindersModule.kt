@@ -58,6 +58,7 @@ import com.mahood.family.core.ui.PickTimeDialog
 import com.mahood.family.core.ui.ScreenTitle
 import com.mahood.family.core.ui.SectionLabel
 import com.mahood.family.core.ui.dayLabel
+import com.mahood.family.core.ui.relativeTime
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -121,7 +122,7 @@ class RemindersModule : FamilyModule {
 
     private fun done(ctx: ModuleContext, r: Record) {
         val c = current(r) ?: return
-        ctx.put(R, r.id, mapOf("doneThrough" to c.toString(), "doneBy" to ctx.me?.email))
+        ctx.put(R, r.id, mapOf("doneThrough" to c.toString(), "doneBy" to ctx.me?.email, "doneAt" to System.currentTimeMillis()))
         ReminderAlarms.schedule(ctx.appContext)
     }
 
@@ -141,8 +142,11 @@ class RemindersModule : FamilyModule {
                     c.isBefore(today) -> "Overdue since ${dayLabel(c)}"
                     else -> "${dayLabel(c)} at ${hm(ReminderAlarms.minutes(r))}"
                 }
+                val doer = members.firstOrNull { it.email == r.string("doneBy") }?.name
+                val lastDone = if (compact || r.string("doneThrough") == null) "" else
+                    " · last done" + (doer?.let { " by $it" } ?: "") + (r.long("doneAt")?.let { " ${relativeTime(it)}" } ?: "")
                 Text(
-                    (if (compact) dueText else "$dueText · ${whenText(r)}") + " · ${who?.name ?: "Both"}",
+                    (if (compact) dueText else "$dueText · ${whenText(r)}") + " · ${who?.name ?: "Both"}" + lastDone,
                     fontSize = 12.5.sp,
                     color = if (c != null && c.isBefore(today)) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 )

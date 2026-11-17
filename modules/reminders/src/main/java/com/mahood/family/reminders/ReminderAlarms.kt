@@ -121,7 +121,7 @@ object ReminderAlarms {
 
     /** Tick off the occurrence on [date]; syncs to the other phones. */
     fun markDone(context: Context, id: String, date: String) {
-        Family.context.put(COLLECTION, id, mapOf("doneThrough" to date, "doneBy" to Family.myEmail))
+        Family.context.put(COLLECTION, id, mapOf("doneThrough" to date, "doneBy" to Family.myEmail, "doneAt" to System.currentTimeMillis()))
         NotificationManagerCompat.from(context).cancel(id.hashCode())
         schedule(context)
     }

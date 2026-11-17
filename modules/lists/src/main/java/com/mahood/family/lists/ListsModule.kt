@@ -68,6 +68,7 @@ import com.mahood.family.core.ui.Avatar
 import com.mahood.family.core.ui.HomeCardFrame
 import com.mahood.family.core.ui.ScreenTitle
 import com.mahood.family.core.ui.SectionLabel
+import com.mahood.family.core.ui.clockTime
 import com.mahood.family.core.ui.relativeTime
 
 /**
@@ -218,7 +219,7 @@ class ListsModule : FamilyModule {
                     val group = grouped[aisle] ?: continue
                     item(key = "h-$aisle") { SectionLabel("${Aisles.emoji[aisle] ?: ""} $aisle".trim()) }
                     items(group.sortedBy { it.long("created") ?: 0L }, key = { it.id }) { item ->
-                        ItemRow(item, members, onToggle = { ctx.put(ITEMS, item.id, mapOf("done" to true)) }, onDelete = null,
+                        ItemRow(item, members, onToggle = { ctx.put(ITEMS, item.id, mapOf("done" to true, "doneBy" to ctx.me?.email, "doneAt" to System.currentTimeMillis())) }, onDelete = null,
                             onEdit = { editing = item })
                     }
                 }
@@ -315,6 +316,15 @@ class ListsModule : FamilyModule {
                     )
                     val detail = listOfNotNull(item.string("qty"), item.string("note")).filter { it.isNotBlank() }.joinToString(" · ")
                     if (detail.isNotEmpty() && !done) Text(detail, fontSize = 12.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (done) {
+                        // Small log line: who ticked it and when.
+                        val ticker = members.firstOrNull { it.email == item.string("doneBy") }
+                        val at = item.long("doneAt")
+                        if (ticker != null || at != null) Text(
+                            "✓ " + listOfNotNull(ticker?.name, at?.let { "${clockTime(it)} · ${relativeTime(it)}" }).joinToString(" · "),
+                            fontSize = 11.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
                 if (onDelete != null) {
                     IconButton(onClick = onDelete) { Icon(Icons.Filled.Close, "Remove", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
