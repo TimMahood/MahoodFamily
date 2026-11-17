@@ -1,12 +1,16 @@
 package com.mahood.family
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import com.mahood.family.core.Family
 import com.mahood.family.core.FamilyModule
 import com.mahood.family.core.sync.SyncEngine
-import com.mahood.family.core.ui.Avatar
 import com.mahood.family.core.ui.ScreenTitle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,11 +56,12 @@ fun HomeScreen(modules: List<FamilyModule>, open: (String) -> Unit) {
                 "$greeting${me?.let { ", ${it.name}" } ?: ""}",
                 LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE d MMMM")),
             ) {
-                Row {
-                    members.take(5).forEachIndexed { i, m ->
-                        Box(Modifier.offset(x = (-8 * i).dp)) { Avatar(m, 34.dp) }
-                    }
-                }
+                Image(
+                    painterResource(R.drawable.family_photo),
+                    contentDescription = "The family",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(52.dp).clip(CircleShape),
+                )
             }
         }
         val failed = status as? SyncEngine.Status.Failed

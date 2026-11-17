@@ -35,4 +35,10 @@ interface FamilyModule {
      * Return short lines to show in a notification, or an empty list for none.
      */
     fun notificationLines(ctx: ModuleContext, remoteOps: List<Op>): List<String> = emptyList()
+
+    /**
+     * Called when the app starts and after a sync brings in other people's changes,
+     * so a module can schedule things on this phone (reminder alarms, for example).
+     */
+    fun onDataChanged(ctx: ModuleContext) {}
 }

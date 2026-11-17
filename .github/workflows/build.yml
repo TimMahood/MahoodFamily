@@ -34,7 +34,7 @@ jobs:
           fi
 
       - name: Unit tests
-        run: ./gradlew --no-daemon :core:testDebugUnitTest
+        run: ./gradlew --no-daemon testDebugUnitTest
 
       - name: Build release APK
         env:

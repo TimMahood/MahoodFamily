@@ -28,6 +28,7 @@ object Family {
     private const val K_KEY = "family_key"
     private const val K_EMAIL = "my_email"
     private const val K_ENABLED = "enabled_modules"
+    private const val K_KNOWN = "known_modules"
 
     val isSetUp: Boolean get() = folderId != null && familyKey != null && myEmail != null
 
@@ -49,15 +50,30 @@ object Family {
         return store.record(Member.COLLECTION, email)?.let(Member::from)
     }
 
+    /**
+     * Modules switched on for this phone. A module added in an app update (one that
+     * wasn't known when the choices were saved) follows its default, so new
+     * features show up without the old choices hiding them.
+     */
     fun enabledModules(): List<FamilyModule> {
         val saved = store.get(K_ENABLED)?.split(",")?.filter { it.isNotBlank() }?.toSet()
-        return modules.filter { if (saved == null) it.enabledByDefault else it.id in saved }
+        val known = store.get(K_KNOWN)?.split(",")?.filter { it.isNotBlank() }?.toSet()
+        return modules.filter {
+            when {
+                saved == null -> it.enabledByDefault
+                known != null && it.id !in known -> it.enabledByDefault
+                // Saved before "known" was recorded: only the first three modules existed then.
+                known == null && it.id !in setOf("calendar", "lists", "board") -> it.enabledByDefault
+                else -> it.id in saved
+            }
+        }
     }
 
     fun setEnabled(module: FamilyModule, enabled: Boolean) {
         val current = enabledModules().map { it.id }.toMutableSet()
         if (enabled) current += module.id else current -= module.id
         store.set(K_ENABLED, current.joinToString(","))
+        store.set(K_KNOWN, modules.joinToString(",") { it.id })
     }
 
     fun requestSync() = SyncScheduler.syncSoon(appContext)

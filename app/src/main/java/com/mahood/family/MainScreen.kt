@@ -25,13 +25,18 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mahood.family.core.Family
 
-/** Bottom navigation: Home, each enabled module, and Family (members, modules, sync). */
+/**
+ * Bottom navigation: Home, the first few enabled modules, and Family (members,
+ * children, every feature, sync). Other features open from their Home card or
+ * from the Family tab, so the bar never overflows however many are switched on.
+ */
 @Composable
 fun MainScreen(onLeft: () -> Unit) {
     val nav = rememberNavController()
     // Bumped when modules are switched on/off so the bottom bar updates.
     var modulesVersion by remember { mutableIntStateOf(0) }
     val enabled = remember(modulesVersion) { Family.enabledModules() }
+    val tabs = enabled.take(MAX_MODULE_TABS)
     val backStack by nav.currentBackStackEntryAsState()
     val route = backStack?.destination?.route
 
@@ -48,14 +53,15 @@ fun MainScreen(onLeft: () -> Unit) {
                     selected = route == "home", onClick = { go("home") },
                     icon = { Icon(Icons.Filled.Home, null) }, label = { Text("Home") },
                 )
-                enabled.forEach { m ->
+                tabs.forEach { m ->
                     NavigationBarItem(
                         selected = route == "m/${m.id}", onClick = { go("m/${m.id}") },
                         icon = { Icon(m.icon, null) }, label = { Text(m.title) },
                     )
                 }
+                val onOtherModule = route?.startsWith("m/") == true && tabs.none { route == "m/${it.id}" }
                 NavigationBarItem(
-                    selected = route == "family", onClick = { go("family") },
+                    selected = route == "family" || onOtherModule, onClick = { go("family") },
                     icon = { Icon(Icons.Filled.Apps, null) }, label = { Text("Family") },
                 )
             }
@@ -71,9 +77,12 @@ fun MainScreen(onLeft: () -> Unit) {
                     }
                 }
                 composable("family") {
-                    FamilyScreen(onModulesChanged = { modulesVersion++ }, onLeft = onLeft)
+                    FamilyScreen(onModulesChanged = { modulesVersion++ }, onLeft = onLeft, open = { go("m/$it") })
                 }
             }
         }
     }
 }
+
+/** Home + 3 modules + Family keeps the bar at five items, the most that fit. */
+private const val MAX_MODULE_TABS = 3

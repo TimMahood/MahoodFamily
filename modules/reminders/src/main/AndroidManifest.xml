@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application>
+        <!-- Fires when a reminder is due, and handles the notification's "Done" button. -->
+        <receiver android:name="com.mahood.family.reminders.ReminderReceiver" android:exported="false" />
+        <!-- Re-arms reminder alarms after the phone restarts or the app updates. -->
+        <receiver android:name="com.mahood.family.reminders.ReminderBootReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

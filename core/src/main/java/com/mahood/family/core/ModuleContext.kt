@@ -33,11 +33,29 @@ class ModuleContext(
         return list
     }
 
+    @Composable
+    fun kids(): List<Kid> {
+        val flow = remember { store.observe(Kid.COLLECTION).map { rs -> rs.map(Kid::from).sortedWith(compareBy<Kid> { it.born ?: java.time.LocalDate.MAX }.thenBy { it.name.lowercase() }) } }
+        val list by flow.collectAsState(initial = emptyList())
+        return list
+    }
+
+    /** Grown-ups then children, as one list of people (kids use their record id as the "email"). */
+    @Composable
+    fun everyone(): List<Member> = members() + kids().map { it.asMember() }
+
     /** Write fields to a synced record and schedule a sync. */
     fun put(collection: String, id: String, fields: Map<String, Any?>) {
         store.put(collection, id, fields)
         requestSync()
     }
+
+    /**
+     * Like [put], but also brings the record back if it was deleted earlier. Use it
+     * for records with fixed ids (a day, a person) that can be cleared and set again.
+     */
+    fun create(collection: String, id: String, fields: Map<String, Any?>) =
+        put(collection, id, fields + (FamilyStore.DELETED to false))
 
     fun delete(collection: String, id: String) {
         store.delete(collection, id)
